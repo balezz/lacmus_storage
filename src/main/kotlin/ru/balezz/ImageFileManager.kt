@@ -6,12 +6,14 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.util.logging.Logger
 
 
 class ImageFileManager {
 
-    private val TARGET_DIR_NAME = "JPEGImages"
+    private val TARGET_DIR_NAME = "JPEGImages/"
     private val TARGET_DIR = Paths.get(TARGET_DIR_NAME)
+    val LOG = Logger.getLogger(this::class.java.name)
 
     init {
         if (!Files.exists(TARGET_DIR)) {
@@ -24,7 +26,7 @@ class ImageFileManager {
      */
     private fun getImagePath(imageMeta: ImageMeta?): Path {
         assert(imageMeta != null)
-        return TARGET_DIR.resolve(TARGET_DIR_NAME + imageMeta?.id.toString() + ".jpg")
+        return TARGET_DIR.resolve(imageMeta?.id.toString() + ".jpg")
     }
 
     /**
@@ -57,6 +59,7 @@ class ImageFileManager {
             throw FileNotFoundException("Unable to find the referenced image file for imageId:"
                     + imageMeta.id)
         }
+        LOG.info("Loading image path: $source")
         Files.copy(source, out)
         return out
     }
@@ -74,6 +77,7 @@ class ImageFileManager {
     fun saveImageData(imageMeta: ImageMeta?, imageData: InputStream?) {
         assert(imageData != null)
         val target = getImagePath(imageMeta)
+        LOG.info("Saving image path: $target")
         Files.copy(imageData, target, StandardCopyOption.REPLACE_EXISTING)
     }
 

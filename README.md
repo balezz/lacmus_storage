@@ -45,7 +45,7 @@ sending a POST to /image/{id}/data.
 Image data saved as {id}.jpg file in specified directory.
 
 
-**GET /image/{id}/data**   
+**GET /image/{id}/data**
 Returns the binary jpeg data (if any) for the image with the given
 identifier. If no jpeg data has been uploaded for the specified image,
 then the server should return a 404 status code.

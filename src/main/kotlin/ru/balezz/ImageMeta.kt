@@ -1,27 +1,23 @@
 package ru.balezz
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
 import javax.persistence.Id
 
 @Entity
-class ImageMeta(
+data class ImageMeta(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
         val id: Long,
         val title: String,
-        val duration: Long,
         val location: String,
-        val subject: String,
-        val contentType: String,
-
-        @JsonIgnore
-        val dataUrl: String
+        val contentType: String
 ) {
-    enum class ImageStatus {
-        OK
+
+
+    override fun toString(): String {
+        return "$title, $id, $location, $contentType"
     }
 }
 
+enum class ImageStatus {
+    OK
+}

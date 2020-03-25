@@ -26,8 +26,10 @@ dependencies {
 	implementation("org.hsqldb:hsqldb")
 	implementation("com.google.guava:guava:17.0")
 	implementation("org.apache.commons:commons-lang3:3.3.2")
-	implementation("com.squareup.retrofit:retrofit:1.6.0")
+	implementation("com.squareup.retrofit2:retrofit:2.7.1")
 	implementation("commons-io:commons-io:2.4")
+	implementation ("com.squareup.retrofit2:converter-gson:2.3.0")
+	implementation ("com.squareup.retrofit2:adapter-rxjava:2.7.0")
 
 	// testImplementation("junit:junit: 4.12")
 	testImplementation("org.springframework.boot:spring-boot-starter-test") 

@@ -1,21 +1,18 @@
 package ru.balezz
 
 import com.google.common.collect.Lists
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Bean
 
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
-import retrofit.mime.TypedFile
 import ru.balezz.ImageSvcApi.Companion.IMAGE_SVC_PATH
 import ru.balezz.ImageSvcApi.Companion.IMAGE_DATA_PATH
 import ru.balezz.ImageSvcApi.Companion.IMAGE_META_PATH
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.util.*
+import java.util.logging.Logger
 
 @Controller
 @Component
@@ -23,6 +20,7 @@ class ImageController(
     private val imageRepo: ImageRepository
 ) {
 
+    val LOG = Logger.getLogger(this::class.java.name)
     val imageFileMan = ImageFileManager()
 
     @RequestMapping(IMAGE_SVC_PATH, method = [RequestMethod.GET])
@@ -33,39 +31,49 @@ class ImageController(
 
     @RequestMapping(IMAGE_SVC_PATH, method = [RequestMethod.POST])
     @ResponseBody
-    fun addImageMeta(imageMeta: ImageMeta): ImageMeta {
-        imageRepo.save(imageMeta)
-        return imageMeta
+    fun addImageMeta(@RequestBody imageMeta: ImageMeta): ImageMeta {
+        val saved = imageRepo.save(imageMeta)
+        return saved
     }
 
     @RequestMapping(IMAGE_META_PATH, method = [RequestMethod.GET])
     @ResponseBody
-    fun getImageMeta(id: Long): Optional<ImageMeta> {
-        return imageRepo.findById(id)
+    fun getImageMeta(@PathVariable id: Long): ImageMeta {
+        try {
+            return imageRepo.findById(id).get()
+        } catch (e: Exception) {
+            throw ImageNotFoundException()
+        }
     }
 
     @RequestMapping(IMAGE_DATA_PATH, method = [RequestMethod.POST])
     @ResponseBody
-    fun setImageData(id: Long, imageData: TypedFile): ImageMeta.ImageStatus {
-        val imageMeta = imageRepo.findById(id)
-        val inputStream = imageData.`in`()
+    fun setImageData(
+            @PathVariable id: Long,
+            @RequestBody imageData: ByteArray
+    ): ImageStatus {
+        LOG.info("Set image data id: $id")
         try {
-
-            imageFileMan.saveImageData(imageMeta.get(), inputStream)
-        } catch (e: IOException){
+            val imageMeta = imageRepo.findById(id).get()
+            val inputStream = imageData.inputStream()
+            imageFileMan.saveImageData(imageMeta, inputStream)
+            return ImageStatus.OK
+        } catch (e: Exception){
+            e.printStackTrace()
             throw ImageNotFoundException()
         }
-        return ImageMeta.ImageStatus.OK
     }
 
     @RequestMapping(IMAGE_DATA_PATH, method = [RequestMethod.GET])
     @ResponseBody
-    fun getImageData(id: Long): ByteArray {
-        val imageMeta = imageRepo.findById(id)
+    fun getImageData(@PathVariable id: Long): ByteArray {
+        LOG.info("Get image data id: $id")
         try {
-            val outputStream = imageFileMan.loadImageData(imageMeta.get())
+            val imageMeta = imageRepo.findById(id).get()
+            val outputStream = imageFileMan.loadImageData(imageMeta)
             return (outputStream as ByteArrayOutputStream).toByteArray()
-        } catch (e: IOException) {
+        } catch (e: Exception) {
+            e.printStackTrace()
             throw ImageNotFoundException()
         }
     }

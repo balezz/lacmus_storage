@@ -18,9 +18,10 @@
  */
 package ru.balezz
 
-import retrofit.client.Response
-import retrofit.http.*
-import retrofit.mime.TypedFile
+import retrofit2.Call
+import retrofit2.Response
+import retrofit2.http.*
+import rx.Observable
 
 /**
  * This interface defines an API for a Image REST Service.
@@ -88,19 +89,19 @@ interface ImageSvcApi {
     }
 
     @GET(IMAGE_SVC_PATH)
-    fun getImageList(): Collection<ImageMeta>
+    fun getImageList(): Observable<List<ImageMeta>>
 
     @POST(IMAGE_SVC_PATH)
-    fun addImageMeta(@Body imageMeta: ImageMeta): ImageMeta
+    fun addImageMeta(@Body imageMeta: ImageMeta): Observable<ImageMeta>
 
     @GET(IMAGE_META_PATH)
-    fun getImageMeta( @Path(DATA_PARAMETER) id: Long): ImageMeta
+    fun getImageMeta( @Path(DATA_PARAMETER) id: Long): Observable<ImageMeta>
 
     @POST(IMAGE_DATA_PATH)
     fun setImageData(
-        @Path(DATA_PARAMETER) id: Long,
-        @Part(ID_PARAMETER) imageData: TypedFile): ImageMeta.ImageStatus
+        @Path(ID_PARAMETER) id: Long,
+        @Body imageData: ByteArray): Observable<ImageStatus>
 
     @GET(IMAGE_DATA_PATH)
-    fun getImageData( @Path(ID_PARAMETER) id: Long): Response
+    fun getImageData( @Path(ID_PARAMETER) id: Long): Observable<Response<ByteArray>>
 }
