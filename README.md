@@ -49,4 +49,4 @@ Image data saved as {id}.jpg file in specified directory.
 Returns the binary jpeg data (if any) for the image with the given
 identifier. If no jpeg data has been uploaded for the specified image,
 then the server should return a 404 status code.
-  
+
