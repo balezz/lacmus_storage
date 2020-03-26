@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*
 import ru.balezz.ImageSvcApi.Companion.IMAGE_SVC_PATH
 import ru.balezz.ImageSvcApi.Companion.IMAGE_DATA_PATH
 import ru.balezz.ImageSvcApi.Companion.IMAGE_META_PATH
+import ru.balezz.model.Annotation
+import ru.balezz.model.ImageStatus
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.logging.Logger
@@ -25,20 +27,20 @@ class ImageController(
 
     @RequestMapping(IMAGE_SVC_PATH, method = [RequestMethod.GET])
     @ResponseBody
-    fun getImageList(): Collection<ImageMeta> {
+    fun getImageList(): Collection<Annotation> {
         return Lists.newArrayList(imageRepo.findAll())
     }
 
     @RequestMapping(IMAGE_SVC_PATH, method = [RequestMethod.POST])
     @ResponseBody
-    fun addImageMeta(@RequestBody imageMeta: ImageMeta): ImageMeta {
-        val saved = imageRepo.save(imageMeta)
+    fun addImageMeta(@RequestBody annotation: Annotation): Annotation {
+        val saved = imageRepo.save(annotation)
         return saved
     }
 
     @RequestMapping(IMAGE_META_PATH, method = [RequestMethod.GET])
     @ResponseBody
-    fun getImageMeta(@PathVariable id: Long): ImageMeta {
+    fun getImageMeta(@PathVariable id: Long): Annotation {
         try {
             return imageRepo.findById(id).get()
         } catch (e: Exception) {

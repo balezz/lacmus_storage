@@ -6,7 +6,6 @@ import org.junit.Assert.assertTrue
 import java.io.File
 import java.io.FileInputStream
 import java.util.Arrays
-import java.util.HashSet
 
 import org.apache.commons.io.IOUtils
 import org.junit.Test
@@ -16,28 +15,28 @@ import retrofit2.Retrofit
 import retrofit2.HttpException
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import ru.balezz.model.Annotation
+import ru.balezz.model.ImageStatus
+import java.io.StringWriter
 
 
 import java.util.logging.Logger
+import javax.xml.bind.JAXBContext
+import javax.xml.bind.Marshaller
 
 
 @SpringBootTest
 class IntegrationTests {
-	companion object {
-		private const val SERVER = "http://localhost:8080"
-		val LOG = Logger.getLogger(this::class.java.name)
-	}
+
+	val LOG = Logger.getLogger(this::class.java.name)
+
+	private val SERVER = "http://localhost:8080"
 
 	private val testImagePath = "src/test/resources/JPEGImages/1.jpg"
 
 	private val testImageData = File(testImagePath)
 
-	private val testImageMeta = ImageMeta(
-			id = 1L,
-			title = "TestImage",
-			contentType = "image/jpeg",
-			location = testImagePath
-	)
+	private val testImageMeta = Annotation()
 
 	private val retrofit = Retrofit.Builder()
 			.baseUrl(SERVER)
@@ -54,13 +53,13 @@ class IntegrationTests {
 	@Test
 	@Throws(Exception::class)
 	fun testAddImageMetadata() {
-		LOG.info("testAddImageMetadata: testImageMeta = $testImageMeta")
+		LOG.info("testAddImageMetadata: testImageMeta = ${convertToXml(testImageMeta)}")
 		imageSvc.addImageMeta(testImageMeta).subscribe {
 			val received = it
-			LOG.info("testAddImageMetadata: $received")
-			assertEquals(testImageMeta.title, received.title)
-			assertEquals(testImageMeta.contentType, received.contentType)
-			assertEquals(testImageMeta.location, received.location)
+			LOG.info("testAddImageMetadata: ${convertToXml(received)}")
+			assertEquals(testImageMeta.id, received.id)
+			assertEquals(testImageMeta.folder, received.folder)
+			assertEquals(testImageMeta.annoObject, received.annoObject)
 			assertTrue(received.id > 0)
 		}
 	}
@@ -88,30 +87,21 @@ class IntegrationTests {
 	 * */
 	@Test
 	fun testAddGetImageData() {
-		imageSvc.addImageMeta(testImageMeta).subscribe(){
+		imageSvc.addImageMeta(testImageMeta).subscribe {
 			val received = it
-			LOG.info("test Id: " + testImageMeta.id)
-			LOG.info("received Id: " + received.id)
 			assertEquals(received.id, testImageMeta.id)
 		}
-
-
 
 		imageSvc.setImageData(1L, testImageData.readBytes()).subscribe(){
 			assertEquals(it, ImageStatus.OK)
 		}
 
-
-
-		imageSvc.getImageData(1L).subscribe() {
+		imageSvc.getImageData(1L).subscribe {
 
 			val response = it
 			assertEquals(200, response.code())
-
 			val receivedImageData = response.body()
 			val testFile = IOUtils.toByteArray(FileInputStream(testImageData))
-			LOG.info("$testImageData " + String(testFile).slice(0..10))
-			LOG.info("$receivedImageData " + String(receivedImageData!!).slice(0..10))
 			assertTrue(Arrays.equals(testFile, receivedImageData))
 		}
 	}
@@ -146,6 +136,14 @@ class IntegrationTests {
 		}
 
 	}
+}
 
-
+inline fun <reified T> convertToXml(anno: T) : StringWriter
+{
+	val jaxbContext = JAXBContext.newInstance(T::class.java)
+	val marshaller = jaxbContext.createMarshaller()
+	marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
+	val stringWriter = StringWriter()
+	stringWriter.use { marshaller.marshal(anno, stringWriter) }
+	return stringWriter
 }

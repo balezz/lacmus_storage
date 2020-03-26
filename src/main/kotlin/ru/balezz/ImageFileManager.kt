@@ -1,6 +1,6 @@
 package ru.balezz
 
-import org.springframework.context.annotation.Bean
+import ru.balezz.model.Annotation
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -24,20 +24,20 @@ class ImageFileManager {
     /**
      *  Private helper method for resolving image file paths
      */
-    private fun getImagePath(imageMeta: ImageMeta?): Path {
-        assert(imageMeta != null)
-        return TARGET_DIR.resolve(imageMeta?.id.toString() + ".jpg")
+    private fun getImagePath(annotation: Annotation?): Path {
+        assert(annotation != null)
+        return TARGET_DIR.resolve(annotation?.id.toString() + ".jpg")
     }
 
     /**
      * This method returns true if the specified ImageMeta has binary
      * data stored on the file system.
      *
-     * @param imageMeta
+     * @param annotation
      * @return
      */
-    fun hasImageData(imageMeta: ImageMeta?): Boolean {
-        val source = getImagePath(imageMeta)
+    fun hasImageData(annotation: Annotation?): Boolean {
+        val source = getImagePath(annotation)
         return Files.exists(source)
     }
 
@@ -47,17 +47,17 @@ class ImageFileManager {
      * ensuring that the specified ImageMeta has binary data associated
      * with it. If not, this method will throw a FileNotFoundException.
      *
-     * @param imageMeta
+     * @param annotation
      * @param out
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun loadImageData(imageMeta: ImageMeta): OutputStream? {
-        val source = getImagePath(imageMeta)
+    fun loadImageData(annotation: Annotation): OutputStream? {
+        val source = getImagePath(annotation)
         val out = ByteArrayOutputStream()
         if (!Files.exists(source)) {
             throw FileNotFoundException("Unable to find the referenced image file for imageId:"
-                    + imageMeta.id)
+                    + annotation.id)
         }
         LOG.info("Loading image path: $source")
         Files.copy(source, out)
@@ -69,14 +69,14 @@ class ImageFileManager {
      * it on the file system. The data is associated with the ImageMeta object that
      * is provided by the client caller.
      *
-     * @param imageMeta
+     * @param annotation
      * @param imageData
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun saveImageData(imageMeta: ImageMeta?, imageData: InputStream?) {
+    fun saveImageData(annotation: Annotation?, imageData: InputStream?) {
         assert(imageData != null)
-        val target = getImagePath(imageMeta)
+        val target = getImagePath(annotation)
         LOG.info("Saving image path: $target")
         Files.copy(imageData, target, StandardCopyOption.REPLACE_EXISTING)
     }

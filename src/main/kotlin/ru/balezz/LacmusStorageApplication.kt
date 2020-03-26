@@ -11,6 +11,3 @@ class LacmusStorageApplication
 fun main(args: Array<String>) {
 	runApplication<LacmusStorageApplication>(*args)
 }
-
-
-

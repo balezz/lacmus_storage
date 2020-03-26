@@ -18,9 +18,10 @@
  */
 package ru.balezz
 
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
+import ru.balezz.model.Annotation
+import ru.balezz.model.ImageStatus
 import rx.Observable
 
 /**
@@ -89,13 +90,13 @@ interface ImageSvcApi {
     }
 
     @GET(IMAGE_SVC_PATH)
-    fun getImageList(): Observable<List<ImageMeta>>
+    fun getImageList(): Observable<List<Annotation>>
 
     @POST(IMAGE_SVC_PATH)
-    fun addImageMeta(@Body imageMeta: ImageMeta): Observable<ImageMeta>
+    fun addImageMeta(@Body annotation: Annotation): Observable<Annotation>
 
     @GET(IMAGE_META_PATH)
-    fun getImageMeta( @Path(DATA_PARAMETER) id: Long): Observable<ImageMeta>
+    fun getImageMeta( @Path(DATA_PARAMETER) id: Long): Observable<Annotation>
 
     @POST(IMAGE_DATA_PATH)
     fun setImageData(
