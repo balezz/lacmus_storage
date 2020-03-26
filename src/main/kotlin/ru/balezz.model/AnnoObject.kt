@@ -24,12 +24,6 @@ data class AnnoObject(
 fun main() {
     val anno = AnnoObject()
     println(convertToXml(anno))
-//    val jaxbContext = JAXBContext.newInstance(AnnoObject::class.java)
-//    val marshaller = jaxbContext.createMarshaller()
-//    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
-//    val stringWriter = StringWriter()
-//    stringWriter.use { marshaller.marshal(anno, stringWriter) }
-//    println(stringWriter)
 }
 
 inline fun <reified T> convertToXml(anno: T) : StringWriter

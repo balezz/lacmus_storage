@@ -35,11 +35,11 @@ import rx.Observable
  *
  * GET /image
  *   - Returns the list of images meta information (include bbox annotations)
- *     that have been added to the server as JSON.
+ *     that have been added to the server as JSON or XML.
  *     The images meta information persisted in MongoDB / Postgres.
  *     The list of ImageMeta objects unmarshalled into a Collection<ImageMeta>.
  *
- * POST /image
+ * POST /image/json
  *   - The image data is provided as an application/json request body.
  *     The JSON generate an instance of the ImageMeta class when deserialized
  *     by Spring's default Jackson library.
@@ -54,7 +54,24 @@ import rx.Observable
  *     The "data url" is the url of the binary data for a
  *     Image (e.g., the raw jpeg data). The URL should be the *full* URL
  *     for the image and not just the path.
- *     Example method to figure out the name of server:
+ *
+ *
+ * POST /image/xml
+ *   - The image data is provided as an application/xml request body.
+ *     The XML string generate an instance of the ImageMeta class when deserialized
+ *     by Java's default JAXB library.
+ *   - Returns the XML representation of the ImageMeta object that
+ *     was stored along with any updates to that object.
+ *     --The server generate a unique identifier for the ImageMeta
+ *     object and assign it while saving in database.
+ *     The returned ImageMeta XML should include this server-generated
+ *     identifier so that the client can refer to it when uploading the
+ *     binary jpeg content for the ImageMeta.
+ *    -- The server also generates a "data url" for the Image.
+ *     The "data url" is the url of the binary data for a
+ *     Image (e.g., the raw jpeg data). The URL should be the *full* URL
+ *     for the image and not just the path.
+ *
  *
  * GET /image/{id}/meta
  *   - Returns the image meta information (include bbox annotations)

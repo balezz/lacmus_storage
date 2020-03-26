@@ -12,14 +12,14 @@ import javax.xml.bind.annotation.XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 data class Annotation(
         @XmlElement val folder: String,
-        @Id
-        @XmlElement(name="filename") val id: Long,
+
+        @Id @XmlElement(name="filename") val id: Long,
         @XmlElement val source: Source,
-        @XmlElement val Size: Size,
+        @XmlElement(name="size") val imgSize: ImgSize,
         @XmlElement val segmented: Int,
-        @XmlElement val annoObject: List<AnnoObject>
+        @XmlElement val annoObject: ArrayList<AnnoObject>
 ){
-    constructor():this("JPEGImages", 1, Source(), Size(), 0, listOf(AnnoObject()))
+    constructor():this("JPEGImages", 1, Source(), ImgSize(), 0, arrayListOf<AnnoObject>())
 }
 
 enum class ImageStatus {
