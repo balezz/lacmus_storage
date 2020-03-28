@@ -1,6 +1,6 @@
-package ru.balezz
+package ru.balezz.storage
 
-import ru.balezz.model.Annotation
+import ru.balezz.model.ImgAnno
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -24,20 +24,20 @@ class ImageFileManager {
     /**
      *  Private helper method for resolving image file paths
      */
-    private fun getImagePath(annotation: Annotation?): Path {
-        assert(annotation != null)
-        return TARGET_DIR.resolve(annotation?.id.toString() + ".jpg")
+    private fun getImagePath(imgAnno: ImgAnno?): Path {
+        assert(imgAnno != null)
+        return TARGET_DIR.resolve(imgAnno?.id.toString() + ".jpg")
     }
 
     /**
      * This method returns true if the specified ImageMeta has binary
      * data stored on the file system.
      *
-     * @param annotation
+     * @param imgAnno
      * @return
      */
-    fun hasImageData(annotation: Annotation?): Boolean {
-        val source = getImagePath(annotation)
+    fun hasImageData(imgAnno: ImgAnno?): Boolean {
+        val source = getImagePath(imgAnno)
         return Files.exists(source)
     }
 
@@ -47,17 +47,16 @@ class ImageFileManager {
      * ensuring that the specified ImageMeta has binary data associated
      * with it. If not, this method will throw a FileNotFoundException.
      *
-     * @param annotation
-     * @param out
+     * @param imgAnno
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun loadImageData(annotation: Annotation): OutputStream? {
-        val source = getImagePath(annotation)
+    fun loadImageData(imgAnno: ImgAnno): OutputStream? {
+        val source = getImagePath(imgAnno)
         val out = ByteArrayOutputStream()
         if (!Files.exists(source)) {
             throw FileNotFoundException("Unable to find the referenced image file for imageId:"
-                    + annotation.id)
+                    + imgAnno.id)
         }
         LOG.info("Loading image path: $source")
         Files.copy(source, out)
@@ -69,14 +68,14 @@ class ImageFileManager {
      * it on the file system. The data is associated with the ImageMeta object that
      * is provided by the client caller.
      *
-     * @param annotation
+     * @param imgAnno
      * @param imageData
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun saveImageData(annotation: Annotation?, imageData: InputStream?) {
+    fun saveImageData(imgAnno: ImgAnno?, imageData: InputStream?) {
         assert(imageData != null)
-        val target = getImagePath(annotation)
+        val target = getImagePath(imgAnno)
         LOG.info("Saving image path: $target")
         Files.copy(imageData, target, StandardCopyOption.REPLACE_EXISTING)
     }

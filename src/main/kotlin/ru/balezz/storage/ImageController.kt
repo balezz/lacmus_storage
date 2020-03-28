@@ -1,4 +1,4 @@
-package ru.balezz
+package ru.balezz.storage
 
 import com.google.common.collect.Lists
 
@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
-import ru.balezz.ImageSvcApi.Companion.IMAGE_SVC_PATH
-import ru.balezz.ImageSvcApi.Companion.IMAGE_DATA_PATH
-import ru.balezz.ImageSvcApi.Companion.IMAGE_META_PATH
-import ru.balezz.model.Annotation
+import ru.balezz.storage.ImageSvcApi.Companion.IMAGE_SVC_PATH
+import ru.balezz.storage.ImageSvcApi.Companion.IMAGE_DATA_PATH
+import ru.balezz.storage.ImageSvcApi.Companion.IMAGE_JSON_PATH
+import ru.balezz.model.ImgAnno
 import ru.balezz.model.ImageStatus
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -21,26 +21,26 @@ import java.util.logging.Logger
 class ImageController(
     private val imageRepo: ImageRepository
 ) {
-
     val LOG = Logger.getLogger(this::class.java.name)
     val imageFileMan = ImageFileManager()
 
     @RequestMapping(IMAGE_SVC_PATH, method = [RequestMethod.GET])
     @ResponseBody
-    fun getImageList(): Collection<Annotation> {
+    fun getImageAnnoList(): ArrayList<ImgAnno> {
         return Lists.newArrayList(imageRepo.findAll())
     }
 
     @RequestMapping(IMAGE_SVC_PATH, method = [RequestMethod.POST])
     @ResponseBody
-    fun addImageMeta(@RequestBody annotation: Annotation): Annotation {
-        val saved = imageRepo.save(annotation)
+    fun addImageAnno(@RequestBody imgAnno: ImgAnno): ImgAnno {
+        val saved = imageRepo.save(imgAnno)
+        LOG.info("Saved annotation: $saved")
         return saved
     }
 
-    @RequestMapping(IMAGE_META_PATH, method = [RequestMethod.GET])
+    @RequestMapping(IMAGE_JSON_PATH, method = [RequestMethod.GET])
     @ResponseBody
-    fun getImageMeta(@PathVariable id: Long): Annotation {
+    fun getAnnotationJson(@PathVariable id: Long): ImgAnno {
         try {
             return imageRepo.findById(id).get()
         } catch (e: Exception) {

@@ -13,13 +13,15 @@ import org.springframework.boot.test.context.SpringBootTest
 
 import retrofit2.Retrofit
 import retrofit2.HttpException
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
-import ru.balezz.model.Annotation
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+
+import ru.balezz.storage.ImageSvcApi
+import ru.balezz.model.ImgAnno
 import ru.balezz.model.ImageStatus
+
+
 import java.io.StringWriter
-
-
 import java.util.logging.Logger
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
@@ -30,17 +32,17 @@ class IntegrationTests {
 
 	val LOG = Logger.getLogger(this::class.java.name)
 
-	private val SERVER = "http://localhost:8080"
+	private val SERVER = "http://127.0.0.1:8080"
 
 	private val testImagePath = "src/test/resources/JPEGImages/1.jpg"
-
 	private val testImageData = File(testImagePath)
 
-	private val testImageMeta = Annotation()
+	private val testAnnoPath = "src/test/resources/Annotations/1.xml"
+	private val testAnnotation = unmarshallXml(testAnnoPath)
 
 	private val retrofit = Retrofit.Builder()
 			.baseUrl(SERVER)
-			.addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+			.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
 			.addConverterFactory(GsonConverterFactory.create())
 			.build()
 
@@ -52,16 +54,13 @@ class IntegrationTests {
 	 * */
 	@Test
 	@Throws(Exception::class)
-	fun testAddImageMetadata() {
-		LOG.info("testAddImageMetadata: testImageMeta = ${convertToXml(testImageMeta)}")
-		imageSvc.addImageMeta(testImageMeta).subscribe {
-			val received = it
-			LOG.info("testAddImageMetadata: ${convertToXml(received)}")
-			assertEquals(testImageMeta.id, received.id)
-			assertEquals(testImageMeta.folder, received.folder)
-			assertEquals(testImageMeta.annoObject, received.annoObject)
-			assertTrue(received.id > 0)
-		}
+	fun testAddImageAnnotation() {
+		LOG.info("testAddImageMeta: testAnnotation = ${marshallToXml(testAnnotation)}")
+		val call = imageSvc.addAnnotation(testAnnotation)
+		val received = call.execute().body()
+
+		LOG.info("testAddImageMeta: receivedAnnotation = ${marshallToXml(received!!)}")
+		assertEquals(testAnnotation, received)
 	}
 
 
@@ -72,38 +71,35 @@ class IntegrationTests {
 	@Test
 	@Throws(Exception::class)
 	fun testAddGetImageMeta() {
-		imageSvc.addImageMeta(testImageMeta)
-		imageSvc.getImageList().subscribe {
-			val storedList = it
-			assertTrue(storedList!!.contains(testImageMeta))
-		}
-
+		LOG.info("testImageAnnotaton: " + testAnnotation)
+		imageSvc.addAnnotation(testAnnotation)
+		val call = imageSvc.getImageList()
+		val storedList = call.execute().body()
+		LOG.info("Stored image list: $storedList")
+		assertTrue(storedList!!.contains(testAnnotation))
 	}
 
 
 	/**
-	 *   Ensure that server returns 200 and testImageMeta data saved
+	 *   Ensure that server returns testImageMeta data saved
 	 *   and linked with existence ImageMeta element
 	 * */
 	@Test
 	fun testAddGetImageData() {
-		imageSvc.addImageMeta(testImageMeta).subscribe {
-			val received = it
-			assertEquals(received.id, testImageMeta.id)
-		}
+		val call = imageSvc.addAnnotation(testAnnotation)
+		val received = call.execute().body()
+		val id = received!!.id!!
+		assertEquals(received, testAnnotation)
 
-		imageSvc.setImageData(1L, testImageData.readBytes()).subscribe(){
-			assertEquals(it, ImageStatus.OK)
-		}
+		val callSet = imageSvc.setImageData(id, testImageData.readBytes())
+		val status = callSet.execute().body()
+		assertEquals(status, ImageStatus.OK)
 
-		imageSvc.getImageData(1L).subscribe {
 
-			val response = it
-			assertEquals(200, response.code())
-			val receivedImageData = response.body()
-			val testFile = IOUtils.toByteArray(FileInputStream(testImageData))
-			assertTrue(Arrays.equals(testFile, receivedImageData))
-		}
+		val callGet = imageSvc.getImageData(id)
+		val response = callGet.execute().body()
+		val testFile = IOUtils.toByteArray(FileInputStream(testImageData))
+		assertTrue(Arrays.equals(testFile, response))
 	}
 
 
@@ -136,14 +132,21 @@ class IntegrationTests {
 		}
 
 	}
+
+	private final fun unmarshallXml(path: String): ImgAnno {
+		val jaxbContext = JAXBContext.newInstance(ImgAnno::class.java)
+		val unmarshaller = jaxbContext.createUnmarshaller()
+		return unmarshaller.unmarshal(File(path)) as ImgAnno
+	}
+
+	private final fun marshallToXml(anno: ImgAnno) : StringWriter
+	{
+		val jaxbContext = JAXBContext.newInstance(ImgAnno::class.java)
+		val marshaller = jaxbContext.createMarshaller()
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
+		val stringWriter = StringWriter()
+		stringWriter.use { marshaller.marshal(anno, stringWriter) }
+		return stringWriter
+	}
 }
 
-inline fun <reified T> convertToXml(anno: T) : StringWriter
-{
-	val jaxbContext = JAXBContext.newInstance(T::class.java)
-	val marshaller = jaxbContext.createMarshaller()
-	marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
-	val stringWriter = StringWriter()
-	stringWriter.use { marshaller.marshal(anno, stringWriter) }
-	return stringWriter
-}
