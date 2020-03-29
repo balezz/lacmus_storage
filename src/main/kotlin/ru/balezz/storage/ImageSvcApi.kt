@@ -19,7 +19,6 @@
 package ru.balezz.storage
 
 import okhttp3.MultipartBody
-import okhttp3.Response
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -92,7 +91,7 @@ interface ImageSvcApi {
         const val ID_PARAMETER =    "id"
         const val IMAGE_SVC_PATH =  "/image"
         const val IMAGE_DATA_PATH = "$IMAGE_SVC_PATH/{id}/data"
-        const val IMAGE_ANNO_PATH = "$IMAGE_SVC_PATH/{id}"
+        const val IMAGE_ANNO_PATH = "$IMAGE_SVC_PATH/{id}/anno"
     }
 
     @GET(IMAGE_SVC_PATH)
