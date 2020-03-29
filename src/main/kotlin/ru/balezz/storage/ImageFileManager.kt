@@ -1,12 +1,14 @@
 package ru.balezz.storage
 
-import ru.balezz.model.ImgAnno
+import org.springframework.web.multipart.MultipartFile
+import ru.balezz.model.ImgAnnotation
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.logging.Logger
+import javax.imageio.ImageIO
 
 
 class ImageFileManager {
@@ -24,8 +26,7 @@ class ImageFileManager {
     /**
      *  Private helper method for resolving image file paths
      */
-    private fun getImagePath(imgAnno: ImgAnno?): Path {
-        assert(imgAnno != null)
+    private fun getImagePath(imgAnno: ImgAnnotation?): Path {
         return TARGET_DIR.resolve(imgAnno?.id.toString() + ".jpg")
     }
 
@@ -36,7 +37,7 @@ class ImageFileManager {
      * @param imgAnno
      * @return
      */
-    fun hasImageData(imgAnno: ImgAnno?): Boolean {
+    fun hasImageData(imgAnno: ImgAnnotation?): Boolean {
         val source = getImagePath(imgAnno)
         return Files.exists(source)
     }
@@ -51,16 +52,10 @@ class ImageFileManager {
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun loadImageData(imgAnno: ImgAnno): OutputStream? {
+    fun loadImageData(imgAnno: ImgAnnotation): ByteArray? {
         val source = getImagePath(imgAnno)
-        val out = ByteArrayOutputStream()
-        if (!Files.exists(source)) {
-            throw FileNotFoundException("Unable to find the referenced image file for imageId:"
-                    + imgAnno.id)
-        }
-        LOG.info("Loading image path: $source")
-        Files.copy(source, out)
-        return out
+        LOG.info("loadImageData: $source")
+        return Files.readAllBytes(source)
     }
 
     /**
@@ -69,15 +64,14 @@ class ImageFileManager {
      * is provided by the client caller.
      *
      * @param imgAnno
-     * @param imageData
+     * @param inputStream
      * @throws IOException
      */
     @Throws(IOException::class)
-    fun saveImageData(imgAnno: ImgAnno?, imageData: InputStream?) {
-        assert(imageData != null)
+    fun saveImageData(imgAnno: ImgAnnotation?, inputStream: InputStream) {
         val target = getImagePath(imgAnno)
         LOG.info("Saving image path: $target")
-        Files.copy(imageData, target, StandardCopyOption.REPLACE_EXISTING)
+        Files.copy(inputStream, target, StandardCopyOption.REPLACE_EXISTING)
     }
 
 }

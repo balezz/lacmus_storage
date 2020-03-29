@@ -18,10 +18,12 @@
  */
 package ru.balezz.storage
 
+import okhttp3.MultipartBody
+import okhttp3.Response
+import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.Response
 import retrofit2.http.*
-import ru.balezz.model.ImgAnno
+import ru.balezz.model.ImgAnnotation
 import ru.balezz.model.ImageStatus
 
 /**
@@ -90,28 +92,25 @@ interface ImageSvcApi {
         const val ID_PARAMETER =    "id"
         const val IMAGE_SVC_PATH =  "/image"
         const val IMAGE_DATA_PATH = "$IMAGE_SVC_PATH/{id}/data"
-        const val IMAGE_XML_PATH =  "$IMAGE_SVC_PATH/{id}/xml"
-        const val IMAGE_JSON_PATH = "$IMAGE_SVC_PATH/{id}/json"
+        const val IMAGE_ANNO_PATH = "$IMAGE_SVC_PATH/{id}"
     }
 
     @GET(IMAGE_SVC_PATH)
-    fun getImageList(): Call<List<ImgAnno>>
+    fun getAnnotationsList(): Call<List<ImgAnnotation>>
 
     @POST(IMAGE_SVC_PATH)
-    fun addAnnotation(@Body imgAnno: ImgAnno): Call<ImgAnno>
+    fun addAnnotation(@Body imgAnno: ImgAnnotation): Call<ImgAnnotation>
 
-    @GET(IMAGE_JSON_PATH)
-    fun getImageJson(@Path(DATA_PARAMETER) id: Long): Call<ImgAnno>
+    @GET(IMAGE_ANNO_PATH)
+    fun getAnnotation(@Path(ID_PARAMETER) id: Long): Call<ImgAnnotation>
 
-    @GET(IMAGE_XML_PATH)
-    fun getImageXml( @Path(DATA_PARAMETER) id: Long): Call<ImgAnno>
-
-
+    @Multipart
     @POST(IMAGE_DATA_PATH)
     fun setImageData(
             @Path(ID_PARAMETER) id: Long,
-            @Body imageData: ByteArray): Call<ImageStatus>
+            @Part imageData: MultipartBody.Part): Call<ImageStatus>
 
+    @Streaming
     @GET(IMAGE_DATA_PATH)
-    fun getImageData( @Path(ID_PARAMETER) id: Long): Call<ByteArray>
+    fun getImageData( @Path(ID_PARAMETER) id: Long): Call<ResponseBody>
 }

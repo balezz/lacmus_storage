@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.*
 @Entity
 @XmlRootElement(name="annotation")
 @XmlAccessorType(XmlAccessType.FIELD)
-data class ImgAnno(
+data class ImgAnnotation(
 
         // todo fix XlmElement names serialization
         @Id @GeneratedValue
@@ -43,7 +43,7 @@ data class ImgAnno(
                 if (this === other) return true
                 if (other?.javaClass != javaClass) return false
 
-                other as ImgAnno
+                other as ImgAnnotation
                 return (other.filename == filename &&
                         other.folder == folder &&
                         other.source == source &&
