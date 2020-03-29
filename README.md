@@ -18,6 +18,7 @@ The server generate a unique identifier for the ImgAnnotation
 object and saving it:
 - in database as COCO annotation
 - in file system as *.xml file PASCAL annotation (todo?).
+
 The returned ImgAnnotation JSON should include this server-generated
 identifier so that the client can refer to it when uploading the
 binary jpeg content for the ImgAnnotation.
