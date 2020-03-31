@@ -1,4 +1,4 @@
-# REST API for a Image Storage Service
+# REST API for an Image Storage Service
 
 ### The HTTP API endpoints:
 
