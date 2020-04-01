@@ -15,9 +15,7 @@ by Spring's default Jackson library.
 Returns the JSON representation of the ImgAnnotation object, persisted in DB
 with updated id.
 The server generate a unique identifier for the ImgAnnotation
-object and saving it:
-- in database as COCO annotation
-- in file system as *.xml file PASCAL annotation (todo?).
+object and saving it in database as standart COCO annotation.
 
 The returned ImgAnnotation JSON should include this server-generated
 identifier so that the client can refer to it when uploading the
